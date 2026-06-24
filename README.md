@@ -42,6 +42,7 @@ switching taxonomy is a one-line `SANDPIPER_PATTERN` change.)
 ```
 python3 01_fetch_data.py       # metalog files (always fresh) + latest sandpiper (if newer)
 python3 02_merge_and_count.py  # single pass over sandpiper, handles both environments
+python3 03_species_to_runs.py "Phocaeicola vulgatus" --min-coverage 10   # one species -> its runs
 ```
 
 ## Output
@@ -60,3 +61,23 @@ A species is only counted in a row whose **coverage ≥ `MIN_COVERAGE`** (defaul
 set at the top of `02_merge_and_count.py`. This filters `species_occurrences.csv` only;
 `shared_runs.txt` lists every run shared between metalog and sandpiper regardless of
 coverage.
+
+## Single-species lookup
+
+`03_species_to_runs.py <species> [--min-coverage N]` finds the runs where one species
+is present, restricted to the same human/ocean shared runs as `02_merge_and_count.py`
+(it rebuilds the same alias→run mapping, then does its own single pass over sandpiper).
+Matching is exact on the `s__` taxonomy token (the `s__` prefix is optional in the
+argument). `--min-coverage` defaults to `10`, matching `MIN_COVERAGE` in `02`.
+
+Always writes two separate lists, one per environment (empty but present if there are
+no matches in that environment):
+
+```
+output/species_samples/human/<species_slug>.csv   # columns: run,coverage
+output/species_samples/ocean/<species_slug>.csv
+```
+
+e.g. `python3 03_species_to_runs.py "Phocaeicola vulgatus" --min-coverage 10` ->
+`output/species_samples/human/phocaeicola_vulgatus.csv` and
+`output/species_samples/ocean/phocaeicola_vulgatus.csv`.

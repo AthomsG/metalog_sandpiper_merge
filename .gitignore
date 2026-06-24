@@ -1,3 +1,4 @@
 fetched_data/
 output/
 *.log
+venv/
